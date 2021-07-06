@@ -20,20 +20,69 @@ using ProtoBuf;
 using System.IO;
 using QuantConnect.Data;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace QuantConnect.DataSource
 {
     /// <summary>
-    /// Example custom data type
+    /// Regalytics Regulatory articles
     /// </summary>
     [ProtoContract(SkipConstructor = true)]
-    public class MyCustomDataType : BaseData
+    public class RegalyticsRegulatoryArticle : BaseData
     {
-        /// <summary>
-        /// Some custom data property
-        /// </summary>
-        [ProtoMember(2000)]
-        public string SomeCustomProperty { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        public int Id { get; set; }
+
+        [JsonProperty(PropertyName = "title")]
+        public string Title { get; set; }
+
+        [JsonProperty(PropertyName = "summary")]
+        public string Summary { get; set; }
+
+        [JsonProperty(PropertyName = "status")]
+        public string Status { get; set; }
+
+        [JsonProperty(PropertyName = "classification")]
+        public string Classificaiton { get; set; }
+
+        [JsonProperty(PropertyName = "filing_type")]
+        public string FilingType { get; set; }
+
+        [JsonProperty(PropertyName = "in_federal_register")]
+        public bool InFederalRegister { get; set; }
+
+        [JsonProperty(PropertyName = "federal_register_number")]
+        public string FederalRegisterNumber { get; set; }
+
+        //[JsonProperty(PropertyName = "regalytics_alert_id")]
+        //public string AlertId { get; set; }
+
+        [JsonProperty(PropertyName = "proposed_comments_due_date")]
+        public DateTime? ProposedCommentsDueDate { get; set; }
+
+        [JsonProperty(PropertyName = "original_publication_date")]
+        public DateTime? OriginalPublicationDate { get; set; }
+
+        [JsonProperty(PropertyName = "federal_register_publication_date")]
+        public DateTime? FederalRegisterPublicationDate { get; set; }
+
+        [JsonProperty(PropertyName = "rule_effective_date")]
+        public DateTime? RuleEffectiveDate { get; set; }
+
+        [JsonProperty(PropertyName = "latest_update")]
+        public DateTime LatestUpdate { get; set; }
+
+        [JsonProperty(PropertyName = "alert_type")]
+        public string AlertType { get; set; }
+
+        [JsonProperty(PropertyName = "states")]
+        public Dictionary<string, List<string>> States { get; set; }
+
+        [JsonProperty(PropertyName = "agencies")]
+        public List<string> Agencies { get; set; }
+
+        [JsonProperty(PropertyName = "pdf_url")]
+        public string AnnouncementUrl { get; set; }
 
         /// <summary>
         /// Return the URL string source of the file. This will be converted to a stream
@@ -48,8 +97,9 @@ namespace QuantConnect.DataSource
                 Path.Combine(
                     Globals.DataFolder,
                     "alternative",
-                    "mycustomdatatype",
-                    $"{config.Symbol.Value.ToLowerInvariant()}.csv"
+                    "regalytics",
+                    "articles",
+                    $"{date:yyyyMMdd}.json"
                 ),
                 SubscriptionTransportMedium.LocalFile
             );
@@ -65,16 +115,16 @@ namespace QuantConnect.DataSource
         /// <returns>New instance</returns>
         public override BaseData Reader(SubscriptionDataConfig config, string line, DateTime date, bool isLiveMode)
         {
-            var csv = line.Split(',');
+            var article = JsonConvert.DeserializeObject<RegalyticsRegulatoryArticle>(line);
 
-            var parsedDate = Parse.DateTimeExact(csv[0], "yyyyMMdd");
-            return new MyCustomDataType
-            {
-                Symbol = config.Symbol,
-                SomeCustomProperty = csv[1],
-                Time = parsedDate,
-                EndTime = parsedDate + TimeSpan.FromDays(1)
-            };
+            // date == the day that the data was published (2021-05-21)
+            // 2021-05-21 for example, contains aggregated data from 2021-05-19, 2021-05-20. 
+            // Regalytics publishes at 07:30:00 Eastern time, EndTime should be at that time.
+
+            article.Symbol = config.Symbol;
+            article.EndTime = date.Date.AddHours(7).AddMinutes(30);
+
+            return article;
         }
 
         /// <summary>
@@ -83,12 +133,30 @@ namespace QuantConnect.DataSource
         /// <returns>A clone of the object</returns>
         public override BaseData Clone()
         {
-            return new MyCustomDataType
+            return new RegalyticsRegulatoryArticle
             {
                 Symbol = Symbol,
                 Time = Time,
                 EndTime = EndTime,
-                SomeCustomProperty = SomeCustomProperty,
+
+                Id = Id,
+                Title = Title,
+                Summary = Summary,
+                Status = Status,
+                Classificaiton = Classificaiton,
+                FilingType = FilingType,
+                InFederalRegister = InFederalRegister,
+                FederalRegisterNumber = FederalRegisterNumber,
+                // AlertId = AlertId,
+                ProposedCommentsDueDate = ProposedCommentsDueDate,
+                OriginalPublicationDate = OriginalPublicationDate,
+                FederalRegisterPublicationDate = FederalRegisterPublicationDate,
+                RuleEffectiveDate = RuleEffectiveDate,
+                LatestUpdate = LatestUpdate,
+                AlertType = AlertType,
+                States = States,
+                Agencies = Agencies,
+                AnnouncementUrl = AnnouncementUrl,
             };
         }
 
@@ -98,7 +166,7 @@ namespace QuantConnect.DataSource
         /// <returns>false</returns>
         public override bool RequiresMapping()
         {
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -116,7 +184,7 @@ namespace QuantConnect.DataSource
         /// </summary>
         public override string ToString()
         {
-            return $"{Symbol} - {SomeCustomProperty}";
+            return $"ID: {Id} - Title: {Title} - Summary: {Summary}";
         }
 
         /// <summary>
@@ -141,7 +209,7 @@ namespace QuantConnect.DataSource
         /// <returns>The <see cref="T:NodaTime.DateTimeZone" /> of this data type</returns>
         public override DateTimeZone DataTimeZone()
         {
-            return DateTimeZone.Utc;
+            return TimeZones.NewYork;
         }
     }
 }

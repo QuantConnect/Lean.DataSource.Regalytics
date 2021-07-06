@@ -13,7 +13,7 @@
  * limitations under the License.
  *
 */
-
+/*
 using System;
 using ProtoBuf;
 using System.IO;
@@ -96,4 +96,4 @@ namespace QuantConnect.DataLibrary.Tests
             };
         }
     }
-}
+}*/
