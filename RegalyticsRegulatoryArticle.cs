@@ -30,6 +30,11 @@ namespace QuantConnect.DataSource
     [ProtoContract(SkipConstructor = true)]
     public class RegalyticsRegulatoryArticle : BaseData
     {
+        /// <summary>
+        /// Data source ID
+        /// </summary>
+        public static int DataSourceId { get; } = 2030;
+
         [JsonProperty(PropertyName = "id")]
         public int Id { get; set; }
 
