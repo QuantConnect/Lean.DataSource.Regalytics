@@ -55,14 +55,10 @@ for article in articles:
 
         country_states.append(state['name'])
 
-    agencies = [agency['name'] for agency in article['agencies']]
     article['states'] = states
-    article['agencies'] = agencies
-    # If friday or weekend, the delta will make the date land on Tuesday
+    article['agencies'] = [agency['name'] for agency in article['agencies']]
+    
     date = datetime.strptime(article['latest_update'], '%Y-%m-%d')
-    weekday = date.weekday()
-    delta = (8 - weekday) if weekday >= 3 else 2
-    date = date + timedelta(days=delta)
     date_key = date.strftime('%Y%m%d')
 
     if date_key not in articles_by_date:
