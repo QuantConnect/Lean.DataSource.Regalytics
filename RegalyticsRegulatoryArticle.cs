@@ -140,7 +140,9 @@ namespace QuantConnect.DataSource
 
             article.Symbol = config.Symbol;
             article.Time = article.LatestUpdate;
-            article.EndTime = DateTimeUtilityFunctions.AddBusinessDays(article.LatestUpdate.Date, 1, false).AddHours(8);
+            article.EndTime = DateTimeUtilityFunctions.AddBusinessDays(article.LatestUpdate.Date, 1, false)
+                .AddHours(8)
+                .ConvertTo(TimeZones.NewYork, config.ExchangeTimeZone);
 
             return article;
         }
