@@ -21,6 +21,7 @@ using System.IO;
 using QuantConnect.Data;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using DateTimeUtilityFunctions = QuantConnect.Securities.Future.FuturesExpiryUtilityFunctions;
 
 namespace QuantConnect.DataSource
 {
@@ -30,6 +31,8 @@ namespace QuantConnect.DataSource
     [ProtoContract(SkipConstructor = true)]
     public class RegalyticsRegulatoryArticle : BaseData
     {
+        private DateTime _endTime;
+
         /// <summary>
         /// Data source ID
         /// </summary>
@@ -89,6 +92,12 @@ namespace QuantConnect.DataSource
         [JsonProperty(PropertyName = "pdf_url")]
         public string AnnouncementUrl { get; set; }
 
+        public override DateTime EndTime
+        {
+            get { return _endTime; }
+            set { _endTime = value; }
+        }
+
         /// <summary>
         /// Return the URL string source of the file. This will be converted to a stream
         /// </summary>
@@ -98,13 +107,15 @@ namespace QuantConnect.DataSource
         /// <returns>String URL of source file.</returns>
         public override SubscriptionDataSource GetSource(SubscriptionDataConfig config, DateTime date, bool isLiveMode)
         {
+            var publicationDate = DateTimeUtilityFunctions.AddBusinessDays(date.Date, -1, false);
+
             return new SubscriptionDataSource(
                 Path.Combine(
                     Globals.DataFolder,
                     "alternative",
                     "regalytics",
                     "articles",
-                    $"{date:yyyyMMdd}.json"
+                    $"{publicationDate:yyyyMMdd}.json"
                 ),
                 SubscriptionTransportMedium.LocalFile
             );
@@ -124,10 +135,12 @@ namespace QuantConnect.DataSource
 
             // date == the day that the data was published (2021-05-21)
             // 2021-05-21 for example, contains aggregated data from 2021-05-19, 2021-05-20. 
-            // Regalytics publishes at 07:30:00 Eastern time, EndTime should be at that time.
+            // Regalytics publishes at around 07:30:00 Eastern Time, but is downloaded by
+            // us around 08:00:00 Eastern Time.
 
             article.Symbol = config.Symbol;
-            article.EndTime = date.Date.AddHours(7).AddMinutes(30);
+            article.Time = article.LatestUpdate;
+            article.EndTime = DateTimeUtilityFunctions.AddBusinessDays(article.LatestUpdate.Date, 1, false).AddHours(8);
 
             return article;
         }
