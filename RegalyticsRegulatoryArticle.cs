@@ -51,7 +51,7 @@ namespace QuantConnect.DataSource
         public string Status { get; set; }
 
         [JsonProperty(PropertyName = "classification")]
-        public string Classificaiton { get; set; }
+        public string Classification { get; set; }
 
         [JsonProperty(PropertyName = "filing_type")]
         public string FilingType { get; set; }
@@ -161,7 +161,7 @@ namespace QuantConnect.DataSource
                 Title = Title,
                 Summary = Summary,
                 Status = Status,
-                Classificaiton = Classificaiton,
+                Classification = Classification,
                 FilingType = FilingType,
                 InFederalRegister = InFederalRegister,
                 FederalRegisterNumber = FederalRegisterNumber,
