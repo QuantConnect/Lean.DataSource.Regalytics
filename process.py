@@ -1,6 +1,6 @@
 import json
 import pathlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import requests
 
@@ -15,7 +15,7 @@ headers = {
 
 response = requests.post(url, headers=headers, data=payload).json()
 articles_path = pathlib.Path('/temp-output-directory/alternative/regalytics/articles')
-# objectives:# download data from API -> temp folder or in memory. Output processed datat  to /temp-output-directory/alternative/regalytics/articles/yyyyMMdd.json
+# objectives:# download data from API -> temp folder or in memory. Output processed data to /temp-output-directory/alternative/regalytics/articles/yyyyMMdd.json
 articles_path.mkdir(parents=True, exist_ok=True)
 # "states": [
 #         {
@@ -27,8 +27,8 @@ articles_path.mkdir(parents=True, exist_ok=True)
 #       ],
 # if states is more than 0
 # loop into state and get the state name
-# 1. query all data, -> /api/.../all; 2. look at latest_update, add delta of 1/2 days;
-# 3. write data to date of latest_update + delta. This date must be on the date we published the article on Regalytics
+# 1. query all data, -> /api/.../all;
+# 2. write data to date of created_time, which is the time that the article was made public
 articles = response['articles']
 articles_by_date = {}
 
@@ -36,36 +36,45 @@ for article in articles:
     article['in_federal_register'] = 'yes' in article['in_federal_register'].lower()
     # State -> Dictionary<string, List<string>>
     states = {}
-    if 'states' not in article or article['states'] is None:
+
+    agencies = article['agencies']
+    if agencies is None or len(agencies) == 0:
         continue
 
-    for state in article['states']:
-        if 'country' not in state:
+    for agency in agencies:
+        countries = agency.get('countries')
+        if countries is None or len(countries) == 0:
             continue
 
-        country = state['country']
-        if country is None:
-            continue
+        state_names = []
+        agency_states = agency.get('states')
 
-        if not country['name'] in states:
-            country_states = []
-            states[country['name']] = country_states
-        else:
-            country_states = states[country['name']]
+        if agency_states is not None:
+            state_names = [state['name'] for state in agency['states'] if state.get('name') is not None]
 
-        country_states.append(state['name'])
+        for country in countries:
+            country_name = country.get('name')
+            if country_name is None:
+                continue
+
+            country_states = states.get(country_name)
+            if country_states is None:
+                country_states = []
+                states[country_name] = country_states
+
+            country_states.extend(state_names)
+            country_states = list(set(country_states))
 
     article['states'] = states
     article['agencies'] = [agency['name'] for agency in article['agencies']]
     
-    date = datetime.strptime(article['latest_update'], '%Y-%m-%d')
+    date = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
     date_key = date.strftime('%Y%m%d')
 
-    if date_key not in articles_by_date:
+    date_articles = articles_by_date.get(date_key)
+    if date_articles is None:
         date_articles = []
         articles_by_date[date_key] = date_articles
-    else:
-        date_articles = articles_by_date[date_key]
 
     date_articles.append(article)
 
