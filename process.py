@@ -1,10 +1,20 @@
 import json
 import pathlib
-from datetime import datetime, timedelta, timezone
 import os
 import requests
+import time
 
-url = os.environ["REGALYTICS_API_BASE_URL"] + "/all"
+from datetime import datetime, timedelta, timezone
+
+url = os.environ["REGALYTICS_API_BASE_URL"] + "/filter"
+processing_date = datetime.strptime(os.environ["QC_DATAFLEET_DEPLOYMENT_DATE"], "%Y%m%d")
+
+# objectives:
+# 1. Download data from paginated API
+# 2. Output processed data to /temp-output-directory/alternative/regalytics/articles/yyyyMMdd.json
+
+articles_path = pathlib.Path('/temp-output-directory/alternative/regalytics/articles')
+articles_path.mkdir(parents=True, exist_ok=True)
 
 payload = json.dumps({
     "apikey": os.environ["REGALYTICS_API_KEY"]
@@ -13,77 +23,76 @@ headers = {
     'Content-Type': 'application/json'
 }
 
-response = requests.post(url, headers=headers, data=payload).json()
-articles_path = pathlib.Path('/temp-output-directory/alternative/regalytics/articles')
-# objectives:# download data from API -> temp folder or in memory. Output processed data to /temp-output-directory/alternative/regalytics/articles/yyyyMMdd.json
-articles_path.mkdir(parents=True, exist_ok=True)
-# "states": [
-#         {
-#           "name": "United States",
-#           "country": {
-#             "name": "United States"
-#           }
-#         }
-#       ],
-# if states is more than 0
-# loop into state and get the state name
-# 1. query all data, -> /api/.../all;
-# 2. write data to date of created_time, which is the time that the article was made public
-articles = response['articles']
-articles_by_date = {}
+page = 1
+total_pages = None
+complete = False
+output_articles = []
 
-for article in articles:
-    article['in_federal_register'] = 'yes' in article['in_federal_register'].lower()
-    # State -> Dictionary<string, List<string>>
-    states = {}
+# API response is sorted in descending order using the `created_at` field
+while not complete and page != total_pages:
+    response = requests.post(url, params={"page": page}, headers=headers, data=payload)
+    if total_pages is None:
+        total_pages = int(response["all_pages"])
 
-    agencies = article['agencies']
-    if agencies is None or len(agencies) == 0:
-        continue
+    articles = response["results"]
 
-    for agency in agencies:
-        countries = agency.get('countries')
-        if countries is None or len(countries) == 0:
+    for article in articles:
+        created_at = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
+        if created_at.date() < processing_date.date():
+            # We've completed processing all the data that was available
+            # for us on the processing date.
+            complete = True
+            break
+
+        if created_at.date() != processing_date.date():
             continue
 
-        state_names = []
-        agency_states = agency.get('states')
+        article['in_federal_register'] = 'yes' in article['in_federal_register'].lower()
+        # State -> Dictionary<string, List<string>>
+        states = {}
 
-        if agency_states is not None:
-            state_names = [state['name'] for state in agency['states'] if state.get('name') is not None]
+        agencies = article['agencies']
+        if agencies is None or len(agencies) == 0:
+            continue
 
-        for country in countries:
-            country_name = country.get('name')
-            if country_name is None:
+        for agency in agencies:
+            countries = agency.get('countries')
+            if countries is None or len(countries) == 0:
                 continue
 
-            country_states = states.get(country_name)
-            if country_states is None:
-                country_states = []
-                states[country_name] = country_states
+            state_names = []
+            agency_states = agency.get('states')
 
-            country_states.extend(state_names)
-            country_states = list(set(country_states))
+            if agency_states is not None:
+                state_names = [state['name'] for state in agency['states'] if state.get('name') is not None]
 
-    article['states'] = states
-    article['agencies'] = [agency['name'] for agency in article['agencies']]
-    
-    date = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
-    date_key = date.strftime('%Y%m%d')
+            for country in countries:
+                country_name = country.get('name')
+                if country_name is None:
+                    continue
 
-    date_articles = articles_by_date.get(date_key)
-    if date_articles is None:
-        date_articles = []
-        articles_by_date[date_key] = date_articles
+                country_states = states.get(country_name)
+                if country_states is None:
+                    country_states = []
+                    states[country_name] = country_states
 
-    date_articles.append(article)
+                country_states.extend(state_names)
+                country_states = list(set(country_states))
 
-for date, articles in articles_by_date.items():
-    lines = []
-    for article in articles:
-        lines.append(json.dumps(article, indent=None))
+        article['states'] = states
+        article['agencies'] = [agency['name'] for agency in article['agencies']]
 
-    article_lines = '\n'.join(lines)
+        output_articles.append(article)
 
-    with open(articles_path / f'{date}.json', 'w') as article_file:
-        article_file.write(article_lines)
+    print(f"Processed page {page} of {total_pages}")
+    page += 1
+    time.sleep(1)
+
+if len(output_articles) == 0:
+    raise Exception(f"No data was processed for deployment date: {processing_date.date()}")
+
+print(f"Writing data to output directory: {articles_path}")
+
+with open(articles_path / f'{processing_date.strftime("%Y%m%d")}.json', 'w') as article_file:
+    lines = '\n'.join([json.dumps(article, indent=None) for article in output_articles])
+    article_file.write(lines)
