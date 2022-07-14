@@ -4,10 +4,10 @@
     <RootNamespace>QuantConnect.DataLibrary.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Demonstration.cs" Link="Demonstration.cs" />
+    <Compile Include="..\RegalyticsRegulatoryArticlesDataAlgorithm.cs" Link="RegalyticsRegulatoryArticlesDataAlgorithm.cs" />
+    <Content Include="..\RegalyticsRegulatoryArticlesDataAlgorithm.py" Link="RegalyticsRegulatoryArticlesDataAlgorithm.py" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="protobuf-net" Version="3.0.29" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1">
       <PrivateAssets>all</PrivateAssets>

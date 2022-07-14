@@ -9,7 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="QuantConnect.Common" Version="2.5.*" />
-    <PackageReference Include="protobuf-net" Version="3.0.29" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
@@ -17,11 +16,10 @@
     <Compile Remove="tests\**" />
     <EmbeddedResource Remove="tests\**" />
     <None Remove="tests\**" />
-    <Compile Remove="Demonstration.cs" />
+    <Compile Remove="RegalyticsRegulatoryArticlesDataAlgorithm.cs" />
+    <None Remove="RegalyticsRegulatoryArticlesDataAlgorithm.py" />
     <None Remove=".gitignore" />
-    <None Remove="process.sample.ipynb" />
-    <None Remove="process.sample.py" />
-    <None Remove="process.sample.sh" />
+    <None Remove="process.py" />
   </ItemGroup>
 
 </Project>

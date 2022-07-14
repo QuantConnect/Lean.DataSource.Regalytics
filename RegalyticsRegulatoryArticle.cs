@@ -15,12 +15,10 @@
 */
 
 using System;
-using NodaTime;
-using ProtoBuf;
-using System.IO;
-using QuantConnect.Data;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using NodaTime;
+using QuantConnect.Data;
 using DateTimeUtilityFunctions = QuantConnect.Securities.Future.FuturesExpiryUtilityFunctions;
 
 namespace QuantConnect.DataSource
@@ -28,11 +26,8 @@ namespace QuantConnect.DataSource
     /// <summary>
     /// Regalytics Regulatory articles
     /// </summary>
-    [ProtoContract(SkipConstructor = true)]
     public class RegalyticsRegulatoryArticle : BaseData
     {
-        private DateTime _endTime;
-
         /// <summary>
         /// Data source ID
         /// </summary>
@@ -92,34 +87,7 @@ namespace QuantConnect.DataSource
         [JsonProperty(PropertyName = "pdf_url")]
         public string AnnouncementUrl { get; set; }
 
-        public override DateTime EndTime
-        {
-            get { return _endTime; }
-            set { _endTime = value; }
-        }
-
-        /// <summary>
-        /// Return the URL string source of the file. This will be converted to a stream
-        /// </summary>
-        /// <param name="config">Configuration object</param>
-        /// <param name="date">Date of this source file</param>
-        /// <param name="isLiveMode">true if we're in live mode, false for backtesting mode</param>
-        /// <returns>String URL of source file.</returns>
-        public override SubscriptionDataSource GetSource(SubscriptionDataConfig config, DateTime date, bool isLiveMode)
-        {
-            var publicationDate = DateTimeUtilityFunctions.AddBusinessDays(date.Date, -1, false);
-
-            return new SubscriptionDataSource(
-                Path.Combine(
-                    Globals.DataFolder,
-                    "alternative",
-                    "regalytics",
-                    "articles",
-                    $"{publicationDate:yyyyMMdd}.json"
-                ),
-                SubscriptionTransportMedium.LocalFile
-            );
-        }
+        public override DateTime EndTime { get; set; }
 
         /// <summary>
         /// Parses the data from the line provided and loads it into LEAN
