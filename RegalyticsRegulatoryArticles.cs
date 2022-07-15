@@ -53,7 +53,7 @@ namespace QuantConnect.DataSource
                     $"{publicationDate:yyyyMMdd}.json"
                 ),
                 SubscriptionTransportMedium.LocalFile,
-                FileFormat.UnfoldingCollection
+                FileFormat.FoldingCollection
             );
         }
 
