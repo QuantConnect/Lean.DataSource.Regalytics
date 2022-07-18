@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using NodaTime;
 using QuantConnect.Data;
-using DateTimeUtilityFunctions = QuantConnect.Securities.Future.FuturesExpiryUtilityFunctions;
+using QuantConnect.Util;
 
 namespace QuantConnect.DataSource
 {
@@ -87,6 +87,8 @@ namespace QuantConnect.DataSource
         [JsonProperty(PropertyName = "pdf_url")]
         public string AnnouncementUrl { get; set; }
 
+        [JsonProperty(PropertyName = "created_at")]
+        [JsonConverter(typeof(DateTimeJsonConverter), "yyyy-MM-dd'T'HH:mm:ss.ffffff")]
         public override DateTime EndTime { get; set; }
 
         /// <summary>
@@ -108,9 +110,6 @@ namespace QuantConnect.DataSource
 
             article.Symbol = config.Symbol;
             article.Time = article.LatestUpdate;
-            article.EndTime = DateTimeUtilityFunctions.AddBusinessDays(article.LatestUpdate.Date, 1, false)
-                .AddHours(8)
-                .ConvertTo(TimeZones.NewYork, config.ExchangeTimeZone);
 
             return article;
         }
@@ -188,7 +187,7 @@ namespace QuantConnect.DataSource
         /// </summary>
         public override List<Resolution> SupportedResolutions()
         {
-            return DailyResolution;
+            return AllResolutions;
         }
 
         /// <summary>

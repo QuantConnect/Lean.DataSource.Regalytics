@@ -22,7 +22,6 @@ using NodaTime;
 using QuantConnect.Data;
 using QuantConnect.Data.UniverseSelection;
 using QuantConnect.Util;
-using DateTimeUtilityFunctions = QuantConnect.Securities.Future.FuturesExpiryUtilityFunctions;
 
 namespace QuantConnect.DataSource
 {
@@ -42,15 +41,13 @@ namespace QuantConnect.DataSource
         /// <returns>String URL of source file.</returns>
         public override SubscriptionDataSource GetSource(SubscriptionDataConfig config, DateTime date, bool isLiveMode)
         {
-            var publicationDate = DateTimeUtilityFunctions.AddBusinessDays(date.Date, -1, false);
-
             return new SubscriptionDataSource(
                 Path.Combine(
                     Globals.DataFolder,
                     "alternative",
                     "regalytics",
                     "articles",
-                    $"{publicationDate:yyyyMMdd}.json"
+                    $"{date:yyyyMMdd}.json"
                 ),
                 SubscriptionTransportMedium.LocalFile,
                 FileFormat.FoldingCollection
