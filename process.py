@@ -11,39 +11,27 @@ HEADERS = {
 }
 ARTICLE_PATH = pathlib.Path('/temp-output-directory/alternative/regalytics/articles')
 
-def main(date):
+def main(process_date):
     # objectives:# download data from API -> temp folder or in memory. Output processed datat  to /temp-output-directory/alternative/regalytics/articles/yyyyMMdd.json
     ARTICLE_PATH.mkdir(parents=True, exist_ok=True)
     articles_by_date = {}
+    
+    process_datetime = datetime.strptime(process_date, '%Y%m%d').date()
+    process_date = process_datetime.strftime('%Y-%m-%d')
 
-    if date == "all":
-        url = f"{URL}/get-all"
-        payload = json.dumps({
-            "apikey": os.environ["REGALYTICS_API_KEY"]
-        })
-        
-        response = requests.post(url, headers=HEADERS, data=payload).json()
-        max_page = response['all_pages']
-        articles = response['results']
-
-        for i in range(2, max_page + 1):
-            response = requests.post(f'{url}?page={i}', headers=HEADERS, data=payload).json()
-            articles += response['results']
-            
-    else:
-        url = f"{URL}/search"
-        payload = json.dumps({
-            "apikey": os.environ["REGALYTICS_API_KEY"],
-            "search_options": {
-                "created_at": {
-                    "start": date,
-                    "end": date
-                }
+    url = f"{URL}/search"
+    payload = json.dumps({
+        "apikey": os.environ["REGALYTICS_API_KEY"],
+        "search_options": {
+            "created_at": {
+                "start": process_date,
+                "end": process_date
             }
-        })
-        
-        response = requests.post(url, headers=HEADERS, data=payload).json()
-        articles = response['articles']
+        }
+    })
+    
+    response = requests.post(url, headers=HEADERS, data=payload).json()
+    articles = response['articles']
         
     # "agencies": [
     #     {
