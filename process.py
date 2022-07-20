@@ -83,7 +83,7 @@ for article in articles:
     article['agencies'] = [agency['name'] for agency in article['agencies']]
     
     # adjust timezone info into UTC time
-    article['created_at'] = article['created_at'][:-3] + "00"       # %z only accepts `-0400` instead of `-04:00` in Python3.6
+    article['created_at'] = article['created_at'][:-3] + article['created_at'][-2:]       # %z only accepts `-0400` instead of `-04:00` in Python3.6
     created_at = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
     article['created_at'] = created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
     date_key = created_at.date().strftime('%Y%m%d')
