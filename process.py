@@ -82,7 +82,9 @@ for article in articles:
     article['states'] = states
     article['agencies'] = [agency['name'] for agency in article['agencies']]
     
-    # adjust timezone info into UTC time
+    # search using `created_at` returns all with UTC time between 00:00-23:59 in a single day, 
+    # so it include some articles created at 20:00-00:00 in EST of the "previous day" (-04:00).
+    # Adjust timezone info of `created_at` field into UTC time to avoid overwriting the previous day file
     article['created_at'] = article['created_at'][:-3] + article['created_at'][-2:]       # %z only accepts `-0400` instead of `-04:00` in Python3.6
     created_at = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
     article['created_at'] = created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
