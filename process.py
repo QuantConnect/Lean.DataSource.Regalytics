@@ -1,6 +1,6 @@
 import json
 import pathlib
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 import os
 import requests
 
@@ -82,21 +82,11 @@ for article in articles:
     article['states'] = states
     article['agencies'] = [agency['name'] for agency in article['agencies']]
     
-    # adjust timezone info (e.g. -04:00) into UTC time
-    timezone_adjust = article['created_at'][-5:]
-    plus_or_minus = article['created_at'][-6]
-    timezone_adjust = datetime.strptime(timezone_adjust, "%H:%M")
-    timedelta_adjust = timedelta(hours=timezone_adjust.hour, minutes=timezone_adjust.minute)
-    
-    created_at = datetime.strptime(article['created_at'][:-6], '%Y-%m-%dT%H:%M:%S.%f')
-    if plus_or_minus == "+":
-        created_at -= timedelta_adjust
-    elif plus_or_minus == "-":
-        created_at += timedelta_adjust
-    
-    # all data received during day T would confer into bar of Time = Day T 00:00; EndTime = Day T+1 00:00 at UTC time
+    # adjust timezone info into UTC time
+    article['created_at'] = article['created_at'][:-3] + "00"       # %z only accepts `-0400` instead of `-04:00` in Python3.6
+    created_at = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
+    article['created_at'] = created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
     date_key = created_at.date().strftime('%Y%m%d')
-    article['created_at'] = created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')     # UTC Time
 
     if date_key not in articles_by_date:
         date_articles = []
