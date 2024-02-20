@@ -55,7 +55,18 @@ namespace QuantConnect.DataLibrary.Tests
 
             AssertAreEqual(expected, result);
         }
-        
+
+        [Test]
+        public void BackwardCompatibilityToV2()
+        {
+            // The Id is a number in v2
+            var line = "{\"id\": 2051381, \"title\": \"House of Representatives Study Bill HSB692: A bill for an act relating to school security, including by modifying provisions related to the issuance of school bonds, requiring schools to conduct school safety reviews and have access to the statewide interoperable communications system, establishing the school emergency radio access grant program and the firearm detection software grant program within the department of homeland security and emergency management, requiring the department of public (I)\", \"summary\": \"Introduced on 2024-02-12. House Study Bill 692 is a piece of legislation in Iowa that focuses on school security. It includes provisions related to the issuance of school bonds, requires schools to conduct safety reviews and have access to a statewide communications system, establishes grant programs for school emergency radio access and firearm detection software, and requires the Department of Public Safety to convene a task force on school safety standards. The bill also appropriates funds for these programs and specifies that the state cost of compliance with the legislation will be paid by school districts from state school foundation aid. The bill takes effect upon enactment. (99IA202320242022HSB692)\", \"status\": \"New\", \"classification\": \"State\", \"filing_type\": \"Single\", \"in_federal_register\": false, \"federal_register_number\": null, \"regalytics_alert_id\": \"99IA2022HSB69225120240212\", \"proposed_comments_due_date\": null, \"original_publication_date\": \"2024-02-12\", \"federal_register_publication_date\": null, \"rule_effective_date\": null, \"latest_update\": \"2024-02-12\", \"alert_type\": \"Study Bill\", \"docket_file_number\": \"\", \"order_notice\": \"\", \"sec_release_number\": \"\", \"agencies\": [\"Iowa House of Representatives\"], \"sector_type\": [{\"name\": \"Financial\"}], \"tags\": [{\"name\": \"All State and Federal Legislatures\"}, {\"name\": \"Introduced Bill\"}], \"subtype_classification\": [{\"name\": \"House of Representatives Study Bill\", \"higher_order_alert_classification\": {\"name\": \"Rule\"}}], \"pdf_url\": \"https://www.legis.iowa.gov/legislation/BillBook?ga=90&ba=HSB692\", \"created_at\": \"2024-02-12T22:31:40.567008\", \"states\": {\"United States\": [\"Iowa\"]}}";
+            var instance = new RegalyticsRegulatoryArticle();
+            var config = new SubscriptionDataConfig(instance.GetType(), Symbol.None, Resolution.Daily, TimeZones.Utc, TimeZones.Utc, false, false, false);
+            var data = instance.Reader(config, line, new DateTime(2024, 2, 12), false) as RegalyticsRegulatoryArticle;
+            Assert.AreEqual("2051381", data.Id);
+        }
+
         private void AssertAreEqual(object expected, object result, bool filterByCustomAttributes = false)
         {
             foreach (var propertyInfo in expected.GetType().GetProperties())
@@ -80,7 +91,7 @@ namespace QuantConnect.DataLibrary.Tests
                 Time = DateTime.Today,
                 DataType = MarketDataType.Base,
 
-                Id = 0,
+                Id = "0",
                 Title = "string",
                 Summary = "string",
                 Status = "string",
@@ -111,7 +122,7 @@ namespace QuantConnect.DataLibrary.Tests
                     Time = DateTime.Today,
                     DataType = MarketDataType.Base,
 
-                    Id = 0,
+                    Id = "0",
                     Title = "string",
                     Summary = "string",
                     Status = "string",
@@ -136,7 +147,7 @@ namespace QuantConnect.DataLibrary.Tests
                     Time = DateTime.Today,
                     DataType = MarketDataType.Base,
 
-                    Id = 0,
+                    Id = "0",
                     Title = "string",
                     Summary = "string",
                     Status = "string",

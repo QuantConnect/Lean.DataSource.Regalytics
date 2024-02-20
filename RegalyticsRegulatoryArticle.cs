@@ -34,7 +34,7 @@ namespace QuantConnect.DataSource
         public static int DataSourceId { get; } = 2030;
 
         [JsonProperty(PropertyName = "id")]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty(PropertyName = "title")]
         public string Title { get; set; }
