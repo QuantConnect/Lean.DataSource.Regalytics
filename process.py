@@ -1,25 +1,22 @@
-import json
-import pathlib
+from json import dumps
+from pathlib import Path
 from datetime import datetime, timezone
-import os
-import requests
+from os import environ
+from requests import post
 
-URL = os.environ["REGALYTICS_API_BASE_URL"]
-HEADERS = {
-    'Content-Type': 'application/json'
-}
-ARTICLE_PATH = pathlib.Path('/temp-output-directory/alternative/regalytics/articles')
+URL = environ.get("REGALYTICS_API_BASE_URL", "https://api.regalytics.ai/api/v3")
+API_KEY = environ.get("REGALYTICS_API_KEY", "")
+DEPLOYMENT_DATE = environ.get('QC_DATAFLEET_DEPLOYMENT_DATE', f'{datetime.now():%Y%m%d}')
 
 # objectives:# download data from API -> temp folder or in memory. Output processed datat  to /temp-output-directory/alternative/regalytics/articles/yyyyMMdd.json
+ARTICLE_PATH = Path('/temp-output-directory/alternative/regalytics/articles')
 ARTICLE_PATH.mkdir(parents=True, exist_ok=True)
 articles_by_date = {}
 
-process_datetime = datetime.strptime(os.environ['QC_DATAFLEET_DEPLOYMENT_DATE'], '%Y%m%d').date()
-process_date = process_datetime.strftime('%Y-%m-%d')
+process_date = datetime.strptime(DEPLOYMENT_DATE, '%Y%m%d').strftime('%Y-%m-%d')
 
-url = f"{URL}/search"
-payload = json.dumps({
-    "apikey": os.environ["REGALYTICS_API_KEY"],
+payload = dumps({
+    "apikey": API_KEY,
     "search_options": {
         "created_at": {
             "start": process_date,
@@ -28,18 +25,17 @@ payload = json.dumps({
     }
 })
 
-response = requests.post(url, headers=HEADERS, data=payload).json()
-articles = response['articles']
+response = post(f"{URL}/search", headers={ 'Content-Type': 'application/json' }, data=payload).json()
     
 # "agencies": [
 #     {
 #         "name": "Iowa Department of Human Services",
-#         "states": [
+#         "state": [
 #             {
 #                 "name": "Iowa"
 #             }
 #         ],
-#         "countries": [
+#         "country": [
 #             {
 #                 "name": "United States"
 #             }
@@ -51,26 +47,18 @@ articles = response['articles']
 # 1. query all data, -> /api/v2/.../get-all; 2. look at latest_update, add delta of 1/2 days;
 # 3. write data to date of latest_update + delta. This date must be on the date we published the article on Regalytics
 
-for article in articles:
+for article in response.get('results', []):
     article['in_federal_register'] = 'yes' in article['in_federal_register'].lower()
     # State -> Dictionary<string, List<string>>
     states = {}
-    for agency in article['agencies']:
-        state = agency['states']
-        
-        if 'states' not in agency or state is None:
+    for agency in article.get('agencies', []):
+        state = agency.get('state')
+        if not state:
             continue
 
-        if 'countries' not in agency:
-            continue
-
-        countries = agency['countries']
-        if countries is None:
-            continue
-        
-        for country in countries:
+        for country in agency.get('country', []):
             name = country['name']
-            
+
             if not name in states:
                 country_states = []
                 states[name] = country_states
@@ -88,7 +76,7 @@ for article in articles:
     article['created_at'] = article['created_at'][:-3] + article['created_at'][-2:]       # %z only accepts `-0400` instead of `-04:00` in Python3.6
     created_at = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
     article['created_at'] = created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
-    date_key = created_at.date().strftime('%Y%m%d')
+    date_key = created_at.strftime('%Y%m%d')
 
     if date_key not in articles_by_date:
         date_articles = []
@@ -99,11 +87,6 @@ for article in articles:
     date_articles.append(article)
 
 for date, articles in articles_by_date.items():
-    lines = []
-    for article in articles:
-        lines.append(json.dumps(article, indent=None))
-
-    article_lines = '\n'.join(lines)
-
     with open(ARTICLE_PATH / f'{date}.json', 'w') as article_file:
+        article_lines = '\n'.join([dumps(article, indent=None) for article in articles])
         article_file.write(article_lines)
