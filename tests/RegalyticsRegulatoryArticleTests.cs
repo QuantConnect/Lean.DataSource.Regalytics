@@ -90,7 +90,7 @@ namespace QuantConnect.DataLibrary.Tests
                 Symbol = Symbol.Empty,
                 Time = DateTime.Today,
                 DataType = MarketDataType.Base,
-
+                
                 Id = "0",
                 Title = "string",
                 Summary = "string",
@@ -99,6 +99,8 @@ namespace QuantConnect.DataLibrary.Tests
                 FilingType = "string",
                 InFederalRegister = true,
                 FederalRegisterNumber = "string",
+                DocketFileNumber = "string",
+                SecReleaseNumber = "string",
                 ProposedCommentsDueDate = DateTime.MinValue,
                 OriginalPublicationDate = DateTime.MinValue,
                 FederalRegisterPublicationDate = DateTime.MinValue,
@@ -107,6 +109,7 @@ namespace QuantConnect.DataLibrary.Tests
                 AlertType = "string",
                 States = new Dictionary<string, List<string>> { {"string", new List<string>{"string"}} },
                 Agencies = new List<string>{"string"},
+                Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                 AnnouncementUrl = "string",
                 CreatedAt = DateTime.MinValue
             };
@@ -130,6 +133,8 @@ namespace QuantConnect.DataLibrary.Tests
                     FilingType = "string",
                     InFederalRegister = true,
                     FederalRegisterNumber = "string",
+                    DocketFileNumber = "string",
+                    SecReleaseNumber = "string",
                     ProposedCommentsDueDate = DateTime.MinValue,
                     OriginalPublicationDate = DateTime.MinValue,
                     FederalRegisterPublicationDate = DateTime.MinValue,
@@ -138,6 +143,7 @@ namespace QuantConnect.DataLibrary.Tests
                     AlertType = "string",
                     States = new Dictionary<string, List<string>> { {"string", new List<string>{"string"}} },
                     Agencies = new List<string>{"string"},
+                    Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                     AnnouncementUrl = "string",
                     CreatedAt = DateTime.MinValue
                 },
@@ -155,6 +161,8 @@ namespace QuantConnect.DataLibrary.Tests
                     FilingType = "string",
                     InFederalRegister = true,
                     FederalRegisterNumber = "string",
+                    DocketFileNumber = "string",
+                    SecReleaseNumber = "string",
                     ProposedCommentsDueDate = DateTime.MinValue,
                     OriginalPublicationDate = DateTime.MinValue,
                     FederalRegisterPublicationDate = DateTime.MinValue,
@@ -163,6 +171,7 @@ namespace QuantConnect.DataLibrary.Tests
                     AlertType = "string",
                     States = new Dictionary<string, List<string>> { {"string", new List<string>{"string"}} },
                     Agencies = new List<string>{"string"},
+                    Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                     AnnouncementUrl = "string",
                     CreatedAt = DateTime.MinValue
                 }

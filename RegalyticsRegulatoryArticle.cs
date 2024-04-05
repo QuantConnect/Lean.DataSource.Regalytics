@@ -57,6 +57,12 @@ namespace QuantConnect.DataSource
         [JsonProperty(PropertyName = "federal_register_number")]
         public string FederalRegisterNumber { get; set; }
 
+        [JsonProperty(PropertyName = "docket_file_number")]
+        public string DocketFileNumber { get; set; }
+
+        [JsonProperty(PropertyName = "sec_release_number")]
+        public string SecReleaseNumber { get; set; }
+
         //[JsonProperty(PropertyName = "regalytics_alert_id")]
         //public string AlertId { get; set; }
 
@@ -83,6 +89,9 @@ namespace QuantConnect.DataSource
 
         [JsonProperty(PropertyName = "agencies")]
         public List<string> Agencies { get; set; }
+
+        [JsonProperty(PropertyName = "sector_type")]
+        public List<Dictionary<string,string>> Sector { get; set; }
 
         [JsonProperty(PropertyName = "pdf_url")]
         public string AnnouncementUrl { get; set; }
@@ -136,6 +145,8 @@ namespace QuantConnect.DataSource
                 FilingType = FilingType,
                 InFederalRegister = InFederalRegister,
                 FederalRegisterNumber = FederalRegisterNumber,
+                DocketFileNumber = DocketFileNumber,
+                SecReleaseNumber = SecReleaseNumber,
                 // AlertId = AlertId,
                 ProposedCommentsDueDate = ProposedCommentsDueDate,
                 OriginalPublicationDate = OriginalPublicationDate,
@@ -145,6 +156,7 @@ namespace QuantConnect.DataSource
                 AlertType = AlertType,
                 States = States,
                 Agencies = Agencies,
+                Sector = Sector,
                 AnnouncementUrl = AnnouncementUrl,
                 CreatedAt = CreatedAt
             };
