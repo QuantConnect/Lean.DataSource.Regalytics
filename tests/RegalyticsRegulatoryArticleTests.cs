@@ -109,7 +109,7 @@ namespace QuantConnect.DataLibrary.Tests
                 AlertType = "string",
                 States = new Dictionary<string, List<string>> { {"string", new List<string>{"string"}} },
                 Agencies = new List<string>{"string"},
-                Sector = "string",
+                Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                 AnnouncementUrl = "string",
                 CreatedAt = DateTime.MinValue
             };
@@ -143,7 +143,7 @@ namespace QuantConnect.DataLibrary.Tests
                     AlertType = "string",
                     States = new Dictionary<string, List<string>> { {"string", new List<string>{"string"}} },
                     Agencies = new List<string>{"string"},
-                    Sector = "string",
+                    Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                     AnnouncementUrl = "string",
                     CreatedAt = DateTime.MinValue
                 },
@@ -171,7 +171,7 @@ namespace QuantConnect.DataLibrary.Tests
                     AlertType = "string",
                     States = new Dictionary<string, List<string>> { {"string", new List<string>{"string"}} },
                     Agencies = new List<string>{"string"},
-                    Sector = "string",
+                    Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                     AnnouncementUrl = "string",
                     CreatedAt = DateTime.MinValue
                 }

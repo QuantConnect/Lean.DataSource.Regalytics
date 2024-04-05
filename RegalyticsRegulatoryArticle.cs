@@ -91,7 +91,7 @@ namespace QuantConnect.DataSource
         public List<string> Agencies { get; set; }
 
         [JsonProperty(PropertyName = "sector_type")]
-        public List<string> Sector { get; set; }
+        public List<Dictionary<string,string>> Sector { get; set; }
 
         [JsonProperty(PropertyName = "pdf_url")]
         public string AnnouncementUrl { get; set; }
