@@ -65,6 +65,7 @@ namespace QuantConnect.DataLibrary.Tests
             var config = new SubscriptionDataConfig(instance.GetType(), Symbol.None, Resolution.Daily, TimeZones.Utc, TimeZones.Utc, false, false, false);
             var data = instance.Reader(config, line, new DateTime(2024, 2, 12), false) as RegalyticsRegulatoryArticle;
             Assert.AreEqual("2051381", data.Id);
+            Assert.AreEqual(DateTime.MinValue, data.SourcedAt);
         }
 
         private void AssertAreEqual(object expected, object result, bool filterByCustomAttributes = false)
@@ -111,7 +112,8 @@ namespace QuantConnect.DataLibrary.Tests
                 Agencies = new List<string>{"string"},
                 Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                 AnnouncementUrl = "string",
-                CreatedAt = DateTime.MinValue
+                CreatedAt = DateTime.MinValue,
+                SourcedAt = DateTime.MinValue,
             };
         }
 
@@ -145,7 +147,8 @@ namespace QuantConnect.DataLibrary.Tests
                     Agencies = new List<string>{"string"},
                     Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                     AnnouncementUrl = "string",
-                    CreatedAt = DateTime.MinValue
+                    CreatedAt = DateTime.MinValue,
+                    SourcedAt = DateTime.MinValue
                 },
                 new RegalyticsRegulatoryArticle
                 {
@@ -173,7 +176,8 @@ namespace QuantConnect.DataLibrary.Tests
                     Agencies = new List<string>{"string"},
                     Sector = new List<Dictionary<string, string>> { new Dictionary<string, string> { { "key", "value" } } },
                     AnnouncementUrl = "string",
-                    CreatedAt = DateTime.MinValue
+                    CreatedAt = DateTime.MinValue,
+                    SourcedAt = DateTime.MinValue
                 }
             };
         }

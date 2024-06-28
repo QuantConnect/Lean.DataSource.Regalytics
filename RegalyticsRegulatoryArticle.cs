@@ -78,6 +78,9 @@ namespace QuantConnect.DataSource
         [JsonProperty(PropertyName = "rule_effective_date")]
         public DateTime? RuleEffectiveDate { get; set; }
 
+        [JsonProperty(PropertyName = "sourced_at")]
+        public DateTime SourcedAt { get; set; }
+
         [JsonProperty(PropertyName = "latest_update")]
         public DateTime LatestUpdate { get; set; }
 
@@ -158,7 +161,8 @@ namespace QuantConnect.DataSource
                 Agencies = Agencies,
                 Sector = Sector,
                 AnnouncementUrl = AnnouncementUrl,
-                CreatedAt = CreatedAt
+                CreatedAt = CreatedAt,
+                SourcedAt = SourcedAt
             };
         }
 
