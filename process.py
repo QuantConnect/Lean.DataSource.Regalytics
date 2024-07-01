@@ -51,7 +51,10 @@ for article in response.get('results', []):
     article['in_federal_register'] = 'yes' in article['in_federal_register'].lower()
     # State -> Dictionary<string, List<string>>
     states = {}
-    for agency in article.get('agencies', []):
+    agencies = article.get('agencies', [])
+    if not agencies:
+        agencies = []
+    for agency in agencies:
         state = agency.get('state')
         if not state:
             continue
@@ -68,7 +71,7 @@ for article in response.get('results', []):
         country_states.extend([x['name'] for x in state])
 
     article['states'] = states
-    article['agencies'] = [agency['name'] for agency in article['agencies']]
+    article['agencies'] = [agency['name'] for agency in agencies]
     
     # search using `created_at` returns all with UTC time between 00:00-23:59 in a single day, 
     # so it include some articles created at 20:00-00:00 in EST of the "previous day" (-04:00).

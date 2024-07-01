@@ -79,7 +79,7 @@ namespace QuantConnect.DataSource
         public DateTime? RuleEffectiveDate { get; set; }
 
         [JsonProperty(PropertyName = "sourced_at")]
-        public DateTime SourcedAt { get; set; }
+        public DateTime? SourcedAt { get; set; }
 
         [JsonProperty(PropertyName = "latest_update")]
         public DateTime LatestUpdate { get; set; }
