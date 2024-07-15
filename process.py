@@ -6,11 +6,11 @@ from requests import post
 import threading
 
 URL = environ.get("REGALYTICS_API_BASE_URL", "https://api.regalytics.ai/api/v3")
-API_KEY = environ.get("REGALYTICS_API_KEY", "0f63222e69a5e25957c4fcf2c739b3b66c102910")
+API_KEY = environ.get("REGALYTICS_API_KEY", "")
 DEPLOYMENT_DATE = environ.get('QC_DATAFLEET_DEPLOYMENT_DATE', f'{datetime.now():%Y%m%d}')
 
 # objectives:# download data from API -> temp folder or in memory. Output processed datat  to /temp-output-directory/alternative/regalytics/articles/yyyyMMdd.json
-ARTICLE_PATH = Path('temp-output-directory_temp/alternative/regalytics/articles')
+ARTICLE_PATH = Path('/temp-output-directory/alternative/regalytics/articles')
 ARTICLE_PATH.mkdir(parents=True, exist_ok=True)
 articles_by_date = {}
 
