@@ -95,7 +95,10 @@ def process(process_date):
             # search using `created_at` returns all with UTC time between 00:00-23:59 in a single day,
             # so it include some articles created at 20:00-00:00 in EST of the "previous day" (-04:00).
             # Adjust timezone info of `created_at` field into UTC time to avoid overwriting the previous day file
-            created_at = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
+            # Some articles omit fractional seconds, e.g. '2025-06-17T00:00:00-04:00'.
+            raw_created_at = article['created_at']
+            created_at_fmt = '%Y-%m-%dT%H:%M:%S.%f%z' if '.' in raw_created_at else '%Y-%m-%dT%H:%M:%S%z'
+            created_at = datetime.strptime(raw_created_at, created_at_fmt).astimezone(timezone.utc)
             article['created_at'] = created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
             date_key = created_at.strftime('%Y%m%d')
 
