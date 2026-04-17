@@ -46,15 +46,17 @@ def get_data_from_source(process_date):
 
     return [page_1] + remaining
     
+# example of agencies field in the article data:
+# On February 3, 2025, the keys in the `agencies` field became `states` and `countries`, instead of `state` and `country`.
 # "agencies": [
 #     {
 #         "name": "Iowa Department of Human Services",
-#         "state": [
+#         "states": [
 #             {
 #                 "name": "Iowa"
 #             }
 #         ],
-#         "country": [
+#         "countries": [
 #             {
 #                 "name": "United States"
 #             }
@@ -78,12 +80,13 @@ def process(process_date):
             states = {}
             agencies = article.get('agencies') or []
             for agency in agencies:
-                state = agency.get('state')
+                state = agency.get('states') or agency.get('state') or []
                 if not state:
                     continue
 
                 state_names = [x['name'] for x in state]
-                for country in agency.get('country', []):
+                countries = agency.get('countries') or agency.get('country') or []
+                for country in countries:
                     states.setdefault(country['name'], []).extend(state_names)
 
             article['states'] = states
