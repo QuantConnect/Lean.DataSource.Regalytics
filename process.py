@@ -72,6 +72,8 @@ def process(process_date):
 
     for response in all_responses:
         for article in response.get('results', []):
+            # Convert `in_federal_register` field into boolean value, default to False if the field is missing or empty or None.
+            article['in_federal_register'] = 'yes' in (article.get('in_federal_register') or '').lower()      
             # State -> Dictionary<string, List<string>>
             states = {}
             agencies = article.get('agencies') or []
