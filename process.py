@@ -46,15 +46,17 @@ def get_data_from_source(process_date):
 
     return [page_1] + remaining
     
+# example of agencies field in the article data:
+# On February 3, 2025, the keys in the `agencies` field became `states` and `countries`, instead of `state` and `country`.
 # "agencies": [
 #     {
 #         "name": "Iowa Department of Human Services",
-#         "state": [
+#         "states": [
 #             {
 #                 "name": "Iowa"
 #             }
 #         ],
-#         "country": [
+#         "countries": [
 #             {
 #                 "name": "United States"
 #             }
@@ -78,12 +80,13 @@ def process(process_date):
             states = {}
             agencies = article.get('agencies') or []
             for agency in agencies:
-                state = agency.get('state')
+                state = agency.get('states') or agency.get('state') or []
                 if not state:
                     continue
 
                 state_names = [x['name'] for x in state]
-                for country in agency.get('country', []):
+                countries = agency.get('countries') or agency.get('country') or []
+                for country in countries:
                     states.setdefault(country['name'], []).extend(state_names)
 
             article['states'] = states
@@ -92,7 +95,10 @@ def process(process_date):
             # search using `created_at` returns all with UTC time between 00:00-23:59 in a single day,
             # so it include some articles created at 20:00-00:00 in EST of the "previous day" (-04:00).
             # Adjust timezone info of `created_at` field into UTC time to avoid overwriting the previous day file
-            created_at = datetime.strptime(article['created_at'], '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(timezone.utc)
+            # Some articles omit fractional seconds, e.g. '2025-06-17T00:00:00-04:00'.
+            raw_created_at = article['created_at']
+            created_at_fmt = '%Y-%m-%dT%H:%M:%S.%f%z' if '.' in raw_created_at else '%Y-%m-%dT%H:%M:%S%z'
+            created_at = datetime.strptime(raw_created_at, created_at_fmt).astimezone(timezone.utc)
             article['created_at'] = created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')
             date_key = created_at.strftime('%Y%m%d')
 
